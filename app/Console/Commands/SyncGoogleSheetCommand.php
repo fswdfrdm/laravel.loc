@@ -50,12 +50,15 @@ class SyncGoogleSheetCommand extends Command
             
             if ($result['success']) {
                 $this->info("{$result['message']}");
+                return 0;
             } else {
                 $this->error("{$result['message']}");
+                return 1;
             }
 
         } catch (\Exception $e) {
             $this->error("Ошибка: " . $e->getMessage());
+            return 1;
         }
 
         $this->info("Синхронизация завершилась.");

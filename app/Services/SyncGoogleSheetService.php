@@ -163,4 +163,57 @@ class SyncGoogleSheetService
             Log::warning('Не удалось очистить таблицу: ' . $e->getMessage());
         }
     }
+
+    public function fetchData(string $url, string $sheet, ?int $count = null)
+    {
+        if (!$url) {
+            return ['success' => false, 'message' => 'Не указан URL.'];
+        }
+
+        $spreadsheetId = $this->extractSheetId($url);
+        if (!$spreadsheetId) {
+            return ['success' => false, 'message' => 'Неправильный формат URL.'];
+        }
+
+        try {
+            Sheets::spreadsheet($spreadsheetId);
+
+            $data = Sheets::sheet($sheet)->all();
+
+            if (empty($data)) {
+                return ['success' => true, 'data' => [], 'message' => 'Таблица пуста.'];
+            }
+
+            array_shift($data);
+            $totalRows = count($data);
+
+            // Ограничиваем количество строк если указан параметр
+            if ($count) {
+                $data = array_slice($data, 0, $count);
+            }
+
+            $results = [];
+            foreach ($data as $row) {
+                $results[] = [
+                    'id' => $row[0] ?? 'N/A',
+                    'content' => $row[1] ?? '',
+                    'created_at' => $row[2] ?? '',
+                    'updated_at' => $row[3] ?? '',
+                    'comment' => $row[4] ?? ''
+                ];
+            }
+
+            return [
+                'success' => true,
+                'data' => $results,
+                'total_rows' => $totalRows,
+                'displayed_rows' => count($results),
+                'message' => 'Данные успешно получены.'
+            ];
+
+        } catch (\Exception $e) {
+            Log::error('Ошибка получения данных: ' . $e->getMessage());
+            return ['success' => false, 'message' => 'Ошибка получения данных: ' . $e->getMessage()];
+        }
+    }
 }
