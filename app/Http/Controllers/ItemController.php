@@ -81,4 +81,46 @@ class ItemController extends Controller
 
         return redirect()->route('items.index')->with('success', 'Строка успешно удалена.');
     }
+
+    // Метод для генерации тестовых 1000 строк с разными статусами (1 через 1)
+    public function generate()
+    {
+        if (Item::count() > 0) {
+            return redirect()->route('items.index')->with('error', 'Строки уже были сгенерированы. Для новой генерации строк очистите таблицу.');
+        }
+
+        $status = Item::getStatus();
+        $statusValues = array_keys($status);
+        $count = 1000;
+        $items = [];
+
+        for ($i = 0; $i < $count; $i++) {
+            $status = $statusValues[$i % count($statusValues)];
+            $items[] = [
+                'content' => 'Новая строка ' . ($i + 1),
+                'status' => $status,
+                'created_at' => now(),
+                'updated_at' => now()
+            ];
+        }
+
+        Item::insert($items);
+
+        return redirect()->route('items.index')->with('success', "Успешно сгенерировано {$count} новых строк.");
+    }
+
+    // Метод полной очистки таблицы айтемов
+    public function clear()
+    {
+        if (Item::count() === 0) {
+            return redirect()->route('items.index')->with('info', 'Таблица уже пуста.');
+        }
+
+        try {
+            Item::truncate();
+            return redirect()->route('items.index')->with('success', 'Таблица успешно очищена.');
+        } catch (\Exception $e) {
+            return redirect()->route('items.index')->with('error', 'Ошибка при попытке очистки таблицы: ' . $e->getMessage());
+        }
+    }
 }

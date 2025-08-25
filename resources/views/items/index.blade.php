@@ -6,6 +6,17 @@
 <div class="container">
     <h1>Таблица | @yield('title')</h1>
     <a href="{{ route('items.create') }}" class="btn btn-primary mb-3">Добавить строку</a>
+
+    <form action="{{ route('items.generate') }}" method="POST" class="mb-3" onsubmit="return confirm('Вы уверены, что хотите сгенерировать 1000 строк?')">
+        @csrf
+        <button type="submit" class="btn btn-success">Сгенерировать 1000 строк</button>
+    </form>
+
+    <form action="{{ route('items.clear') }}" method="POST" class="mb-3" onsubmit="return confirm('Вы уверены, что хотите очистить таблицу?')">
+        @csrf
+        @method('DELETE')
+        <button type="submit" class="btn btn-danger">Очистить таблицу</button>
+    </form>
     
     @if(session('success'))
         <div class="alert alert-success">
