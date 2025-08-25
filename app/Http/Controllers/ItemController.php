@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Item;
+use App\Models\GoogleSheetSetting;
 use Illuminate\Http\Request;
 
 class ItemController extends Controller
@@ -13,7 +14,8 @@ class ItemController extends Controller
     public function index()
     {
         $items = Item::all();
-        return view('items.index', compact('items'));
+        $settings = GoogleSheetSetting::first();
+        return view('items.index', compact('items', 'settings'));
     }
 
     /**
@@ -122,5 +124,18 @@ class ItemController extends Controller
         } catch (\Exception $e) {
             return redirect()->route('items.index')->with('error', 'Ошибка при попытке очистки таблицы: ' . $e->getMessage());
         }
+    }
+
+    // Метод для сохранения ссылки и листа Google Sheet, куда будем синхронить БД
+    public function googleSheetSettings(Request $request)
+    {
+        $request->validate([
+            'url' => 'required|url',
+            'sheet' => 'required|string|max:255'
+        ]);
+
+        GoogleSheetSetting::truncate()->create($request->all());
+
+        return redirect()->route('items.index')->with('success', 'Настройки Google Sheet успешно сохранены.');
     }
 }

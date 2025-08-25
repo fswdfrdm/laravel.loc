@@ -17,6 +17,8 @@
         @method('DELETE')
         <button type="submit" class="btn btn-danger">Очистить таблицу</button>
     </form>
+
+    <a href="#" class="btn btn-warning mb-3" data-bs-toggle="modal" data-bs-target="#googleSheetSettingsModal">Привязать к Google Sheet</a>
     
     @if(session('success'))
         <div class="alert alert-success">
@@ -66,5 +68,40 @@
             @endforeach
         </tbody>
     </table>
+
+    <div class="modal fade" id="googleSheetSettingsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Привязать к Google Sheet</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form action="{{ route('items.google-sheet-settings') }}" method="POST">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Ссылка на гугл таблицу</label>
+                            <input type="url" name="url" class="form-control" required placeholder="https://docs.google.com/spreadsheets/d/..." value="{{ $settings->url ?? '' }}">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Название листа</label>
+                            <input type="text" name="sheet" class="form-control" required placeholder="Лист1" value="{{ $settings->sheet ?? '' }}">
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <strong>Доступно для выгрузки:</strong> 
+                            {{ App\Models\Item::allowed()->count() }} из {{ App\Models\Item::count() }} строк <br>
+                            (В выгрузку берутся строки со статусом "Публикуется")
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Закрыть</button>
+                        <button type="submit" class="btn btn-primary">Сохранить</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </div>
 @endsection
